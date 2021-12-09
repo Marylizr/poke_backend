@@ -1,17 +1,20 @@
 const express = require('express');
-const userController = express.Router();
+const userRouter = express.Router();
 const User = require('../mongo/schemas/user');
 
 
+userRouter.get('/', async(req, res) => {
+   const oneUser = await User.findOne().populate('blog');
+   res.json(oneUser);
+})
 
-
-userController.get('/', async(req, res) => {
-   const allUsers = await User.find();
+userRouter.get('/', async(req, res) => {
+   const allUsers = await User.find().populate('blog');
    res.json(allUsers);
 })
 
 
-userController.post("/", async(req, res) => {
+userRouter.post("/", async(req, res) => {
    //recogemos el body de la request
    const body = req.body;
 
@@ -22,19 +25,48 @@ userController.post("/", async(req, res) => {
    await newUser.save()
 
    console.log('Creating user');
-   
+
    //devolvemos respuesta
    res.json({Message: "Your new User was created Succesfully", newUser});
 });
 
-userController.delete("/", async(req, res) => {
-   const deleteUser = await User.findByIdAndDelete(req.params.id);
+
+userRouter.delete("/", async(req, res) => {
+   const id = await User.findByIdAndDelete({ _id: id });
  
    console.log(`user with id ${id} has been deleted`);
    
-   res.json(deleteUser);
+   res.send();
  
  })
 
 
-module.exports = userController;
+ userRouter.put ("/", async(req, res) => {
+   const id = req.params.id;
+   const data = req.body;
+ 
+   const newUser = {
+     id: id,
+     email: data.email,
+     name: data.name,
+     bio: data.bio,
+   };
+ 
+   res.json({message: "Your user has been updated Succesfully", newUser})
+ })
+ 
+ userRouter.patch ("/", async(req, res) => {
+   const id = req.params.id;
+   const data = req.body;
+ 
+   const newUser = {
+     id: id,
+     email: data.email,
+     name: data.name,
+     description: data.description,
+   };
+ 
+   res.json({message: "Your user has been updated Succesfully", newUser})
+ })
+
+module.exports = userRouter;

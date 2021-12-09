@@ -1,16 +1,21 @@
 const express = require('express')
 const app = express()
 const port = 3001
-const blogController = require('./controllers/blogController');
-const userController = require('./controllers/userController');
+const mongo = require('./mongo');
+
+const blogRouter = require('./controllers/blogController');
+const userRouter = require('./controllers/userController');
+const commentRouter = require('./controllers/commentController');
+
 
 app.use(express.json());
-const mongo = require('./mongo');
 
 
 app.listen(3001, () => {
   console.log(`app listening at http://localhost:${port}`)
 })
 
-app.use('/blogs', blogController);
-app.use('/users', userController);
+app.use("/blogs", blogRouter);
+app.use("/users", userRouter);
+app.use("/comments", commentRouter);
+
