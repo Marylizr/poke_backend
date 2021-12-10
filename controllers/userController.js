@@ -3,10 +3,7 @@ const userRouter = express.Router();
 const User = require('../mongo/schemas/user');
 
 
-userRouter.get('/', async(req, res) => {
-   const oneUser = await User.findOne().populate('blog');
-   res.json(oneUser);
-})
+
 
 userRouter.get('/', async(req, res) => {
    const allUsers = await User.find().populate('blog');
@@ -31,7 +28,7 @@ userRouter.post("/", async(req, res) => {
 });
 
 
-userRouter.delete("/", async(req, res) => {
+userRouter.delete('/:id', async(req, res) => {
    const id = await User.findByIdAndDelete({ _id: id });
  
    console.log(`user with id ${id} has been deleted`);
@@ -41,32 +38,32 @@ userRouter.delete("/", async(req, res) => {
  })
 
 
- userRouter.put ("/", async(req, res) => {
+ userRouter.put ('/:id', async(req, res) => {
    const id = req.params.id;
    const data = req.body;
  
-   const newUser = {
+   const updatedUser = {
      id: id,
      email: data.email,
      name: data.name,
      bio: data.bio,
    };
  
-   res.json({message: "Your user has been updated Succesfully", newUser})
+   res.json({message: "Your user has been updated Succesfully", updatedUser})
  })
  
- userRouter.patch ("/", async(req, res) => {
+ userRouter.patch ('/:id', async(req, res) => {
    const id = req.params.id;
    const data = req.body;
  
-   const newUser = {
+   const updatedUser = {
      id: id,
      email: data.email,
      name: data.name,
      description: data.description,
    };
  
-   res.json({message: "Your user has been updated Succesfully", newUser})
+   res.json({message: "Your user has been updated Succesfully", updatedUser})
  })
 
 module.exports = userRouter;
