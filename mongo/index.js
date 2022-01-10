@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/mongo-test');
+mongoose.connect('mongodb://localhost:27017/pokewiki');
 
 
 const mongo = mongoose.connection;

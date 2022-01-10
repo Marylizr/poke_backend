@@ -7,64 +7,77 @@ const User = require('../mongo/schemas/user');
 
 
 blogRouter.get('/', async(req, res) => {
-   const allBlogs = await Blog.find().populate('author');
+   const allBlogs = await Blog.find();
    res.json(allBlogs);
   
+})
+
+blogRouter.get("/:id", (req, res) => {
+   const id = req.params.id;
+   Blog.findById(id, {}, {} , (error, blog) => {
+
+       if(error){
+           res.status(500).json({error: error.message});
+       }else if(!blog){
+           res.status(404).send();
+       }else {
+           res.json(blog);
+       }
+   });
+
 })
 
 
 blogRouter.post("/", async(req, res) => {
    
-   const body = req.body; //recogemos el body de la request
+   const body = req.body; 
 
-   const newBlog = new Blog(body); //creamos una nueva instancia de blog
+   const newBlog = new Blog(body); 
 
-   await newBlog.save()  //lo guardamos en mongo
+   await newBlog.save()  
 
-   const userId = body.author; //extrae el ID del author en el body y lo guarda en userId
+   const userId = body.author; 
 
-   const user = await User.findById(userId); //la variable user guarda el ID del esquema User
+   const user = await User.findById(userId); 
 
-   user.blog.push(newBlog); //el usuario al crear un blog nuevo lo añade al array de objetos 'blog'
+   user.blog.push(newBlog); 
 
-   await user.save ();// se guarda en el usuario
+   await user.save ();
 
-   //devolvemos respuesta del blog creado
+
    res.json({Message: "Your new Blog was created Succesfully", newBlog});
 });
 
-blogRouter.delete("/", async(req, res) => {
-   const id = await Blog.findByIdAndDelete({ _id: id });
- 
-   console.log(`user with id ${id} has been deleted`);
-   
-   res.send();
+blogRouter.delete("/:id", async(req, res) => {
+   const id = req.params.id;
+
+    Blog.findByIdAndDelete(id, {}, (error, result) =>{
+        if(error){
+            res.status(500).json({error: error.message});
+        }else if(!result){
+            res.status(404);
+        }else{
+            res.status(204).send();
+        }
+    })
  
  })
 
 
- blogRouter.put("/", async(req, res) => {
-   const id = await Blog.findByIdAndDUpdate({ _id: id });
+ blogRouter.patch ('/:id', async(req, res) => {
+   const id = req.params.id;
+   const body = req.body;
  
-   const upDatedBlog = {
-      title: body.title,
-      body: body.body,
-      author: body.author,
-   };
- 
-   res.json({message: "Your user has been updated Succesfully", upDatedBlog})
- })
+   Blog.findByIdAndUpdate(id, body, {new: true}, (error, patchedBlog) => {
+      if(error){
+          res.status(500).json({error: error.message});
+      }else if(!patchedBlog){
+          res.status(404).send();
+      }else{
+          res.json(patchedBlog);
+      }
+  })
 
- blogRouter.patch("/", async(req, res) => {
-   const id = await Comment.findByIdAndDUpdate({ _id: id });
- 
-   const patchedBlog = {
-      title: body.title,
-      body: body.body,
-      author: body.author,
-   };
- 
-   res.json({message: "Your user has been updated Succesfully", patchedBlog})
  })
 
 

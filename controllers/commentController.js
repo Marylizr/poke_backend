@@ -1,66 +1,77 @@
 const express = require('express');
 const commentRouter = express.Router();
 const Comment = require('../mongo/schemas/comment');
-const User = require('../mongo/schemas/user');
 
 
 
-commentRouter.get('/', async(req, res) => {
-   const oneUser = await Comment.findOne().populate('author');
-   res.json(oneUser);
+
+commentRouter.get('/:id', async(req, res) => {
+   const id = req.params.id; 
+   Comment.findOne().populate('author')(id, {}, {} , (error, comment) => {
+
+      if(error){
+          res.status(500).json({error: error.message});
+      }else if(!comment){
+          res.status(404).send();
+      }else {
+          res.json(comment);
+      }
+  }); 
 })
 
 
 commentRouter.get('/', async(req, res) => {
-   const allComments = await Comment.find().populate('author');
+
+   Comment.find((error, comment)).populate('author');
    res.json(allComments);
   
 })
 
 commentRouter.post("/", async(req, res) => {
-   //recogemos el body de la request
+  
    const body = req.body;
-
-   //creamos una nueva instancia del comment,
-   const newComment = new Comment(body);
-
-   //lo guardamos en mongo
-   await newComment.save()
-
-   const userId = body.author; //extrae el ID del author en el body y lo guarda en userId
-
-   const user = await User.findById(userId); //la variable user guarda el ID del esquema Comment
-
-   user.comment.push(newComment); //el usuario al crear un comment nuevo lo añade al array de objetos 'comment'
-
-   await user.save (); // se guarda en el usuario
-
-   //devolvemos respuesta del blog creado
-   res.json({Message: "Your Comment was created Succesfully", newComment});
+   const comment = new Comment(body);
+   comment.save((error, commentSaved ) => {
+       if(error){
+           res.status(500).json({error: error.message});
+       }else{
+           res.status(201).json(commentSaved);
+       }
+   });
 });
 
-commentRouter.delete("/", async(req, res) => {
-   const id = await Comment.findByIdAndDelete({ _id: id });
- 
-   console.log(`comment with id ${id} has been deleted`);
-   
-   res.send();
+commentRouter.delete("/:id", async(req, res) => {
+   const id = req.params.id;
+   Comment.findByIdAndDelete(id, {}, (error, result) =>{
+      if(error){
+          res.status(500).json({error: error.message});
+      }else if(!result){
+          res.status(404);
+      }else{
+          res.status(204).send();
+      }
+      
+  })
  
  })
 
 
- commentRouter.put("/", async(req, res) => {
-   const id = await Comment.findByIdAndDUpdate({ _id: id });
-   const data = req.body;
- 
-   const upDatedComment = {
-      id: id,
-      title: data.title,
-      comment_body: data.comment_body,
-   };
- 
-   res.json({message: "Your comment has been updated Succesfully", upDatedComment})
- })
+ commentRouter.patch("/:id", async(req, res) => {
+   const body = req.body;
+    const id = req.params.id;
+
+    Comment.findByIdAndUpdate(id, body, {new: true}, (error, commentModificado) => {
+        if(error){
+            res.status(500).json({error: error.message});
+        }else if(!commentModificado){
+            res.status(404).send();
+        }else{
+            res.json(commentModificado);
+        }
+    })
+
+
+})
 
 
 
