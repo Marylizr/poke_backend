@@ -8,7 +8,7 @@ const blogRouter = require('./controllers/blogController');
 const userRouter = require('./controllers/userController');
 const commentRouter = require('./controllers/commentController');
 const createRouter = require('./controllers/createController');
-
+const favRouter = require('./controllers/favController');
 
 app.use(express.json());
 
@@ -25,6 +25,7 @@ app.use("/blogs", blogRouter);
 app.use("/users", userRouter);
 app.use("/comments", commentRouter);
 app.use("/createPokeWiki", createRouter);
+app.use("/favs", favRouter);
 
 
 

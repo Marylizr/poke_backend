@@ -1,15 +1,14 @@
 const express = require('express');
-const createPokeWikiRouter = express.Router();
+const favRouter = express.Router();
 const CreatePokeWiki = require('../mongo/schemas/create');
 
 
-
-createPokeWikiRouter.get('/', async(req, res) => {
+favRouter.get('/', async(req, res) => {
    const allcreated = await CreatePokeWiki.find();
    res.json(allcreated);
 })
 
-createPokeWikiRouter.get('/:id', async(req, res) => {
+favRouter.get('/:id', async(req, res) => {
   const id = req.params.id; 
   CreatePokeWiki.findById(id, {}, {} , (error, createPokeWiki) => {
 
@@ -23,10 +22,9 @@ createPokeWikiRouter.get('/:id', async(req, res) => {
  }); 
 });
 
-createPokeWikiRouter.post("/", async(req, res) => {
+favRouter.post("/", async(req, res) => {
 
    const body = req.body;
-
    const data = {
     name: body.name,
     title: body.title,
@@ -46,23 +44,21 @@ createPokeWikiRouter.post("/", async(req, res) => {
 });
 
 
-createPokeWikiRouter.delete('/:id', (req, res) => {
+favRouter.delete('/:id', (req, res) => {
    const id = req.params.id;
    CreatePokeWiki.findByIdAndDelete(id, {}, (error, result) =>{
-    if(error){
-        res.status(500).json({error: error.message});
-    }else if(!result){
-        res.status(404);
-    }else{
-        res.status(204).send();
-    }
-    
-})
-
+      if(error){
+         res.status(500).json({error: error.message});
+      }else if(!result){
+         res.status(404);
+      }else{
+         res.status(204).send();
+      }
+   })
 })
 
  
-createPokeWikiRouter.patch ('/:id', async(req, res) => {
+favRouter.patch ('/:id', async(req, res) => {
    const id = req.params.id;
    const data = req.body;
  
@@ -76,4 +72,4 @@ createPokeWikiRouter.patch ('/:id', async(req, res) => {
    res.json({message: "Your PokeWiki has been updated Succesfully", updatedPokeWiki})
  })
 
-module.exports = createPokeWikiRouter;
+module.exports = favRouter;
