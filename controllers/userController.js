@@ -1,13 +1,26 @@
 const express = require('express');
 const userRouter = express.Router();
 const User = require('../mongo/schemas/user');
-
+const {validationResult} = require("express-validator");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { authMiddleware } = require('../auth/authMiddleware');
 
 
 userRouter.get('/', async(req, res) => {
    const allUsers = await User.find().populate('blog');
-   res.json(allUsers);
-})
+   res.json(allUsers)
+});
+
+userRouter.get('/me', authMiddleware,  async(req, res) => {
+    const oneUsers = await User.findOne();
+    res.json(oneUsers)
+ });
+
+userRouter.get('/name/:id', async(req, res) => {
+    const nameUser = await User.findOne();
+    res.json(nameUser)
+ });
 
 userRouter.get('/:id', async(req, res) => {
   const id = req.params.id; 
@@ -25,37 +38,46 @@ userRouter.get('/:id', async(req, res) => {
 
 userRouter.post("/", async(req, res) => {
 
-   const body = req.body;
+   const {name, lastName, email, password} = req.body;
+   
+   const existingUser = await User.findOne( { email: email })
 
-   // const data = {
-   //  firstName: body.firstName,
-   //  lastName: body.lastName,
-   //  email: body.email
-   // }
+    if(existingUser) {
+      res.status(409).json({Message:"Username already in use"})
+    } 
 
-   const newUser = new User(body);
-
-   await newUser.save()
-
-   console.log('Creating user');
-
-   res.json({Message: "Your new User was created Succesfully", newUser});
-});
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+      return res.status(400).json(errors);
+    }
+    const genSalt = 10;
+    const passwordHashed = bcrypt.hashSync(password, genSalt);
+  
+    const newUser = new User ({
+      name: name,
+      lastName: lastName,
+      email: email,
+      password: passwordHashed,
+    });
+    const userSaved = await newUser.save();
+  
+    const token = jwt.sign({ id: userSaved._id }, process.env.JWT_SECRET, {expiresIn: '1h' });
+    return res.status(201).json({ token: token, id: userSaved._id  });
+    
+  });
 
 
 userRouter.delete('/:id', async(req, res) => {
    const id = req.params.id;
    User.findByIdAndDelete(id, {}, (error, result) =>{
-    if(error){
-        res.status(500).json({error: error.message});
-    }else if(!result){
-        res.status(404);
-    }else{
-        res.status(204).send();
-    }
-    
-})
-
+        if(error){
+            res.status(500).json({error: error.message});
+        }else if(!result){
+            res.status(404);
+        }else{
+            res.status(204).send();
+        }   
+    })
 })
 
  

@@ -6,6 +6,7 @@ const userSchema = new Schema({
    name: String,
    lastName: String,
    email: String,
+   password: String,
    bio: { type: String, match:/[a-z]/ },
    blog: [{
       type: Schema.Types.ObjectId,
