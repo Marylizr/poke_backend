@@ -25,17 +25,16 @@ createPokeWikiRouter.get('/:id', async(req, res) => {
 
 createPokeWikiRouter.post("/", async(req, res) => {
 
-   const body = req.body;
-
-   const data = {
-    name: body.name,
-    title: body.title,
-    description: body.description,
-    url:body.url,
-    thumbnailUrl:body.thumbnail,
-    largeImg:body.largeImg,
-   }
-
+    const {name, title, description, url, thumbnailUrl, largeImg } = req.body;
+    const data = {
+     name,
+     title,
+     description,
+     url,
+     thumbnailUrl,
+     largeImg,
+    }
+    
    const newPokeWiki = new CreatePokeWiki(body);
 
    await newPokeWiki.save()
