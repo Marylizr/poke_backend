@@ -62,6 +62,7 @@ userRouter.post("/", async(req, res) => {
     const userSaved = await newUser.save();
   
     const token = jwt.sign({ id: userSaved._id }, process.env.JWT_SECRET, {expiresIn: '1h' });
+    console.log(process.env.JWT_SECRET)
     return res.status(201).json({ token: token, id: userSaved._id  });
     
   });
