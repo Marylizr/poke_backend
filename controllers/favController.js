@@ -1,23 +1,23 @@
 const express = require('express');
 const favRouter = express.Router();
-const CreatePokeWiki = require('../mongo/schemas/create');
+const FavsWikis = require('../mongo/schemas/favs');
 
 
 favRouter.get('/', async(req, res) => {
-   const allcreated = await CreatePokeWiki.find();
-   res.json(allcreated);
+   const allfavs = await FavsWikis.find();
+   res.json(allfavs);
 })
 
 favRouter.get('/:id', async(req, res) => {
   const id = req.params.id; 
-  CreatePokeWiki.findById(id, {}, {} , (error, createPokeWiki) => {
+  FavsWikis.findById(id, {}, {} , (error, favsWikis) => {
 
      if(error){
          res.status(500).json({error: error.message});
      }else if(!createPokeWiki){
          res.status(404).send();
      }else {
-         res.json(createPokeWiki);
+         res.json(favsWikis);
      }
  }); 
 });
@@ -34,19 +34,19 @@ favRouter.post("/", async(req, res) => {
     largeImg:body.largeImg,
    }
 
-   const newPokeWiki = new CreatePokeWiki(body);
+   const favPokeWiki = new FavsWikis(body);
 
-   await newPokeWiki.save()
+   await favPokeWiki.save()
 
-   console.log('Creating PokeWiki');
+   console.log('Saving in PokeWiki favs');
 
-   res.json({Message: "Your new PokeWiki was created Succesfully", newPokeWiki});
+   res.status(201).json(favPokeWiki);
 });
 
 
 favRouter.delete('/:id', (req, res) => {
    const id = req.params.id;
-   CreatePokeWiki.findByIdAndDelete(id, {}, (error, result) =>{
+   FavsWikis.findByIdAndDelete(id, {}, (error, result) =>{
       if(error){
          res.status(500).json({error: error.message});
       }else if(!result){
