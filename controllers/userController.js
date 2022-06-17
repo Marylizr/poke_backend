@@ -12,7 +12,7 @@ userRouter.get('/', async(req, res) => {
    res.json(allUsers)
 });
 
-userRouter.get('/me', authMiddleware,  async(req, res) => {
+userRouter.get('/me',  async(req, res) => {
     const oneUsers = await User.findOne();
     res.json(oneUsers)
  });
@@ -38,35 +38,33 @@ userRouter.get('/:id', async(req, res) => {
 
 userRouter.post("/", async(req, res) => {
 
-   const {name, lastName, email, password} = req.body;
-   
-   const existingUser = await User.findOne( { email: email })
-
-    if(existingUser) {
-      res.status(409).json({Message:"Username already in use"})
-    } 
-
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-      return res.status(400).json(errors);
-    }
-    const genSalt = 10;
-    const passwordHashed = bcrypt.hashSync(password, genSalt);
-  
-    const newUser = new User ({
-      name: name,
-      lastName: lastName,
-      email: email,
-      password: passwordHashed,
-    });
-    const userSaved = await newUser.save();
-  
-    const token = jwt.sign({ id: userSaved._id }, process.env.JWT_SECRET, {expiresIn: '1h' });
-    console.log(process.env.JWT_SECRET)
-    return res.status(201).json({ token: token, id: userSaved._id  });
+    const {name, lastName, email, password} = req.body;
     
-  });
-
+    const existingUser = await User.findOne( { email: email })
+ 
+     if(existingUser) {
+       res.status(409).json({Message:"Username already in use"})
+     } 
+ 
+     const errors = validationResult(req);
+     if(!errors.isEmpty()){
+       return res.status(400).json(errors);
+     }
+     const genSalt = 10;
+     const passwordHashed = bcrypt.hashSync(password, genSalt);
+   
+     const newUser = new User ({
+       name: name,
+       lastName: lastName,
+       email: email,
+       password: passwordHashed,
+     });
+     const userSaved = await newUser.save();
+   
+     const token = jwt.sign({ id: userSaved._id }, process.env.JWT_SECRET, {expiresIn: '1h' });
+     return res.status(201).json({ token: token, id: userSaved._id  });
+     
+   });
 
 userRouter.delete('/:id', async(req, res) => {
    const id = req.params.id;
